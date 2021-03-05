@@ -109,14 +109,13 @@ func (td *TempalteData) name(v reflect.Value) string {
 }
 
 func (td *TempalteData) objectOf(s string) Object {
-	ss := strings.Split(s, ".")
+	dotPos := strings.LastIndex(s, ".")
 
-	switch len(ss) {
-	case 1:
+	if dotPos == -1 {
 		obj := types.Universe.Lookup(s)
 		return NewObject(obj)
-	case 2:
-		pkg, name := ss[0], ss[1]
+	} else {
+		pkg, name := s[:dotPos], s[dotPos+1:]
 		obj := analysisutil.LookupFromImports(td.Pkg.Imports(), pkg, name)
 		if obj != nil {
 			return NewObject(obj)
@@ -126,7 +125,6 @@ func (td *TempalteData) objectOf(s string) Object {
 		}
 		return NewObject(td.Pkg.Scope().Lookup(name))
 	}
-	return nil
 }
 
 func (td *TempalteData) typeOf(s string) *Type {
